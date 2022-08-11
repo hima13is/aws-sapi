@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="upload-document-to-AWSFlow" doc:id="33e9111b-3896-4aeb-827a-b024392f4cd3" >
+		<set-variable value='#[attributes.headers."x-correlation-id" default ""]' doc:name="Set CorrelationId" doc:id="eb530c57-100d-4328-acfb-68921ace2b2c" variableName="correlationId"/>
+		<logger level="INFO" doc:name="Start Logger" doc:id="78f74656-b270-4539-9922-b391b379d6b8" message='transactionID: #[vars.transactionId]], correlationID: #[vars.correlationID], message: "Started document s3 upload flow": #[payload]'/>
+		<ee:transform doc:name="Transform Base64 and Set input payload" doc:id="12506f44-0047-435f-9c14-78b8a5d50304" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/octet-stream
+import * from dw::core::Binaries
+---
+fromBase64(payload.document)]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="keyPath" ><![CDATA[payload.folderPath as String ++ "/" ++ payload.fileName as String]]></ee:set-variable>
+				<ee:set-variable variableName="bucketName" ><![CDATA[payload.bucketName]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="08e1968c-46f8-45c6-b10c-86cbb18e254a" name="upload-document-to-s3-bucket"/>
+		<ee:transform doc:name="Transform Message" doc:id="21a7f708-6ace-4bc3-8012-60b565bd97c0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  		"code": 200,
+  		"message": "Success",
+  		"description": "Document uploaded successfully",
+  		"dateTime": now(),
+  		"transactionId": vars.transactionId
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="f5e512e3-075f-487d-86b5-490e163e148e" message='transactionID: #[vars.transactionId]], correlationID: #[vars.correlationID], message: "FLow has ended,document uploaded successfully"'/>
+		<error-handler ref="global-error-handler" />
+	</flow>
+</mule>

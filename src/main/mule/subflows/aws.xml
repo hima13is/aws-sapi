@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:s3="http://www.mulesoft.org/schema/mule/s3"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/s3 http://www.mulesoft.org/schema/mule/s3/current/mule-s3.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="c0236514-d28e-40e0-b011-dd0f76ca8243" >
+		<file:connection workingDir="C:\Users\91782\OneDrive\Desktop\uhub\Amazon s3" />
+	</file:config>
+	<sub-flow name="upload-document-to-s3-bucket" doc:id="dac60046-40ea-4a1f-9386-60a388ecd881" >
+		<logger level="DEBUG" doc:name="Before Document Upload" doc:id="78bcfeb4-c8e3-4e3e-b460-22df204a997f" message='transactionID: #[vars.transactionId]], correlationID: #[vars.correlationID], message: "Before document upload to s3",BucketName:#[vars.bucketName],path:#[vars.keyPath]'/>
+		<file:write doc:name="Write" doc:id="ec847bed-9ee1-417b-a80d-7954e9e0fe10" config-ref="File_Config" path="C:\Users\91782\OneDrive\Desktop\uhub\Amazon s3\Covid case.txt"/>
+		<logger level="DEBUG" doc:name="Logger" doc:id="47e3686e-4dd5-4712-a59f-a2a66a28fb48" message='transactionID: #[vars.transactionId]], correlationID: #[vars.correlationID], message: "After document upload to s3",#[payload]'/>
+	</sub-flow>
+</mule>

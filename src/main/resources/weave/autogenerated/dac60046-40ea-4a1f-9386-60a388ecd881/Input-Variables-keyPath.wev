@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_dac60046_40ea_4a1f_9386_60a388ecd881_Input_Variables_keyPath = String
+
